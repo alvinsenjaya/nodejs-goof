@@ -4,26 +4,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('DockerLogin')
     }
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'node:lts-buster-slim'
-                }
-            }
-            steps {
-                sh 'npm install'
-            }
-        }
-        stage('Test') {
-            agent {
-                docker {
-                    image 'node:lts-buster-slim'
-                }
-            }
-            steps {
-                sh 'echo test'
-            }
-        }
         stage('Build Docker Image') {
             agent {
                 docker {
