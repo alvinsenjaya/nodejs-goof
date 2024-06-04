@@ -8,6 +8,7 @@ pipeline {
             agent {
                 docker {
                     image 'docker:dind'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
@@ -18,6 +19,7 @@ pipeline {
             agent {
                 docker {
                     image 'docker:dind'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
@@ -29,6 +31,7 @@ pipeline {
             agent {
                 docker {
                     image 'kroniak/ssh-client'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
