@@ -2,7 +2,6 @@ package-lock.json
 
 .DS_Store
 node_modules
-*.sock
 
 .sass-cache
 sass
