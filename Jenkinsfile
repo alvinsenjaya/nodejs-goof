@@ -12,9 +12,9 @@ pipeline {
                 }
             }
             steps {
-                // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sh 'trufflehog filesystem . --exclude-paths trufflehog-excluded-paths.txt --fail --json > trufflehog-scan-result.json'
-                // }
+                }
                 sh 'cat trufflehog-scan-result.json'
                 archiveArtifacts artifacts: 'trufflehog-scan-result.json'
             }
