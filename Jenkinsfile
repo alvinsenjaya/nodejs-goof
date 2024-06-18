@@ -19,6 +19,62 @@ pipeline {
                 archiveArtifacts artifacts: 'trufflehog-scan-result.json'
             }
         }
+        stage('Build') {
+            agent {
+              docker {
+                  image 'node:lts-buster-slim'
+              }
+            }
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('SCA Snyk Test') {
+            agent {
+              docker {
+                  image 'snyk/snyk:node'
+                  args '-u root --network host --env SNYK_TOKEN=$SNYK_CREDENTIALS_PSW --entrypoint='
+              }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'snyk test --json > snyk-scan-report.json'
+                }
+                sh 'cat snyk-scan-report.json'
+                archiveArtifacts artifacts: 'snyk-scan-report.json'
+            }
+        }
+        stage('SCA Retire Js') {
+            agent {
+              docker {
+                  image 'node:lts-buster-slim'
+              }
+            }
+            steps {
+                sh 'npm install retire'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh './node_modules/retire/lib/cli.js --outputformat json --outputpath retire-scan-report.json'
+                }
+                sh 'cat retire-scan-report.json'
+                archiveArtifacts artifacts: 'retire-scan-report.json'
+            }
+        }
+//        stage('SCA OWASP Dependency Check') {
+//            agent {
+//              docker {
+//                  image 'owasp/dependency-check:latest'
+//                  args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint='
+//              }
+//            }
+//            steps {
+//                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+//                    sh '/usr/share/dependency-check/bin/dependency-check.sh --scan . --project "NodeJS Goof" --format ALL'
+//                }
+//                archiveArtifacts artifacts: 'dependency-check-report.html'
+//                archiveArtifacts artifacts: 'dependency-check-report.json'
+//                archiveArtifacts artifacts: 'dependency-check-report.xml'
+//            }
+//        }
         stage('Build Docker Image') {
             agent {
                 docker {
