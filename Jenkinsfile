@@ -8,7 +8,7 @@ pipeline {
             agent {
                 docker {
                     image 'trufflesecurity/trufflehog:latest'
-                    args '--entrypoint='
+                    args '--no-update --entrypoint='
                 }
             }
             steps {
