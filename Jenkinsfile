@@ -8,7 +8,7 @@ pipeline {
             agent {
                 docker {
                     image 'trufflesecurity/trufflehog:latest'
-                    args '-u $(id -u):$(id -g) --entrypoint='
+                    args '--entrypoint='
                 }
             }
             steps {
@@ -33,7 +33,7 @@ pipeline {
             agent {
                 docker {
                     image 'docker:dind'
-                    args '-u $(id -u):$(id -g) -v /var/run/docker.sock:/var/run/docker.sock'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
@@ -46,7 +46,7 @@ pipeline {
             agent {
                 docker {
                     image 'kroniak/ssh-client'
-                    args '-u $(id -u):$(id -g) -v /var/run/docker.sock:/var/run/docker.sock'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
