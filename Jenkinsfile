@@ -8,12 +8,12 @@ pipeline {
             agent {
                 docker {
                     image 'trufflesecurity/trufflehog:latest'
-                    args '--no-update --entrypoint='
+                    args '--entrypoint='
                 }
             }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh 'trufflehog filesystem . --exclude-paths trufflehog-excluded-paths --fail --json > trufflehog-scan-result.json'
+                    sh 'trufflehog filesystem . --exclude-paths trufflehog-excluded-paths --fail --json --no-update > trufflehog-scan-result.json'
                 }
                 sh 'cat trufflehog-scan-result.json'
                 archiveArtifacts artifacts: 'trufflehog-scan-result.json'
