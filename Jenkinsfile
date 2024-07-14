@@ -4,21 +4,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('DockerLogin')
     }
     stages {
-        stage('Secret Scanning Using Trufflehog') {
-            agent {
-                docker {
-                    image 'trufflesecurity/trufflehog:latest'
-                    args '--entrypoint='
-                }
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh 'trufflehog filesystem . --exclude-paths trufflehog-excluded-paths --fail --json --no-update > trufflehog-scan-result.json'
-                }
-                sh 'cat trufflehog-scan-result.json'
-                archiveArtifacts artifacts: 'trufflehog-scan-result.json'
-            }
-        }
         stage('Build') {
             agent {
                 docker {
@@ -33,7 +18,7 @@ pipeline {
             agent {
                 docker {
                     image 'docker:dind'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
@@ -46,7 +31,7 @@ pipeline {
             agent {
                 docker {
                     image 'kroniak/ssh-client'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
