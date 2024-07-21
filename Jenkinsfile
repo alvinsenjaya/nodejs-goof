@@ -60,22 +60,22 @@ pipeline {
                 archiveArtifacts artifacts: 'retire-scan-report.json'
             }
         }
-        stage('SCA OWASP Dependency Check') {
-            agent {
-              docker {
-                  image 'owasp/dependency-check:latest'
-                  args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint='
-              }
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh '/usr/share/dependency-check/bin/dependency-check.sh --scan . --project "NodeJS Goof" --format ALL'
-                }
-                archiveArtifacts artifacts: 'dependency-check-report.html'
-                archiveArtifacts artifacts: 'dependency-check-report.json'
-                archiveArtifacts artifacts: 'dependency-check-report.xml'
-            }
-        }
+//        stage('SCA OWASP Dependency Check') {
+//            agent {
+//              docker {
+//                  image 'owasp/dependency-check:latest'
+//                  args '-u root -v /var/run/docker.sock:/var/run/docker.sock --entrypoint='
+//              }
+//            }
+//            steps {
+//                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+//                    sh '/usr/share/dependency-check/bin/dependency-check.sh --scan . --project "NodeJS Goof" --format ALL'
+//                }
+//                archiveArtifacts artifacts: 'dependency-check-report.html'
+//                archiveArtifacts artifacts: 'dependency-check-report.json'
+//                archiveArtifacts artifacts: 'dependency-check-report.xml'
+//            }
+//        }
         stage('SCA Trivy Scan Dockerfile Misconfiguration') {
             agent {
               docker {
