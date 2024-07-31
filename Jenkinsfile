@@ -151,5 +151,52 @@ pipeline {
                 }
             }
         }
+//        stage('DAST Nuclei') {
+//            agent {
+//                docker {
+//                    image 'projectdiscovery/nuclei'
+//                    args '--user root --network host --entrypoint='
+//                }
+//            }
+//            steps {
+//                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+//                    sh 'nuclei -u http://192.168.0.117:3001 -nc -j > nuclei-report.json'
+//                    sh 'cat nuclei-report.json'
+//                }
+//                archiveArtifacts artifacts: 'nuclei-report.json'
+//            }
+//        }
+        stage('DAST OWASP ZAP') {
+            agent {
+                docker {
+                    image 'ghcr.io/zaproxy/zaproxy:stable'
+                    args '-u root --network host -v /var/run/docker.sock:/var/run/docker.sock --entrypoint= -v .:/zap/wrk/:rw'
+                }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'zap-baseline.py -t http://192.168.0.117:3001 -r zapbaseline.html -x zapbaseline.xml'
+                }
+                sh 'cp /zap/wrk/zapbaseline.html ./zapbaseline.html'
+                sh 'cp /zap/wrk/zapbaseline.xml ./zapbaseline.xml'
+                archiveArtifacts artifacts: 'zapbaseline.html'
+                archiveArtifacts artifacts: 'zapbaseline.xml'
+            }
+        }
+        stage('DAST Dastardly') {
+            agent {
+                docker {
+                    image 'public.ecr.aws/portswigger/dastardly:latest'
+                    args '-u root --network host -v /var/run/docker.sock:/var/run/docker.sock --entrypoint= -v .:/dastardly/:rw --env BURP_START_URL="http://192.168.0.117:3001" --env BURP_REPORT_FILE_PATH="/dastardly/dastardly-report.xml"'
+                }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh '/usr/local/burpsuite_enterprise/bin/dastardly'
+                }
+                sh 'cp /dastardly/dastardly-report.xml ./dastardly-report.xml'
+                archiveArtifacts artifacts: 'dastardly-report.xml'
+            }
+        }
     }
 }

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuites failures="1" name="Dastardly scan results - have a vulnerability-free day!" tests="24">
+    <testsuite failures="0" name="http://localhost:3001/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/create" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/create" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/create" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/destroy/66aa3cc3ce8943a4e1197d50" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/destroy/66aa3cc6ce8943a4e1197d51" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/destroy/66aa3cfdce8943a4e1197d64" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/destroy/66aa3d00ce8943a4e1197d66" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/destroy/66aa3d37ce8943a4e1197d91" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/edit/66aa3cfdce8943a4e1197d64" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/edit/66aa3d31ce8943a4e1197d8c" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/edit/66aa3d33ce8943a4e1197d8e" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/edit/66aa3d36ce8943a4e1197d90" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/import" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="1" name="http://localhost:3001/public/about.html" tests="1">
+        <testcase name="HTML does not specify charset">
+            <failure message="HTML does not specify charset found at http://localhost:3001/public/about.html" type="Info"><![CDATA[
+Severity: Info
+
+Confidence: Certain
+
+Host: http://localhost:3001
+
+Path: /public/about.html
+
+
+Issue Description
+If a  response states that it contains HTML content but does not specify a character set, then the browser may analyze the HTML and attempt to determine which character set it appears to be using. Even if the majority of the HTML actually employs a standard character set such as UTF-8, the presence of non-standard characters anywhere in the response may cause the browser to interpret the content using a different character set. This can have unexpected results, and can lead to cross-site scripting vulnerabilities in which non-standard encodings like UTF-7 can be used to bypass the application's defensive filters.
+
+In most cases, the absence of a charset directive does not constitute a security flaw, particularly if the response contains static content. You should review the contents of affected responses, and the context in which they appear, to determine whether any vulnerability exists. 
+
+
+Issue Remediation
+For every response containing HTML content, the application should include within the Content-type header a directive specifying a standard recognized character set, for example charset=ISO-8859-1.
+
+
+
+Evidence
+Request:
+GET /public/about.html HTTP/1.1
+Host: localhost:3001
+Accept-Encoding: gzip, deflate, br
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.118 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Cookie: connect.sid=s%3AhnpxhGkq_MW_nxcFZg0CGV1Jl7NsD_ND.njidwKiFFiQ3MsmbC8kdO6nM0tgPUJ1%2B5%2FLJ0MH79bo
+Upgrade-Insecure-Requests: 1
+Referer: http://localhost:3001/
+Sec-CH-UA: ".Not/A)Brand";v="99", "Google Chrome";v="124", "Chromium";v="124"
+Sec-CH-UA-Platform: Windows
+Sec-CH-UA-Mobile: ?0
+
+
+
+Response:
+HTTP/1.1 200 OK
+X-Powered-By: Express
+cache-control: public
+last-modified: Sun, 28 Jul 2024 04:59:19 GMT
+etag: "66309-14026705-1722142759350"
+content-type: text/html
+Date: Wed, 31 Jul 2024 13:31:50 GMT
+Connection: close
+Content-Length: 70
+
+<!DOCTYPE html>
+<html>
+<h1>The BESTest todo app evar</h1>
+</html>
+
+
+
+
+Vulnerability Classifications
+
+- CWE-16: Configuration (https://cwe.mitre.org/data/definitions/16.html)
+
+- CWE-436: Interpretation Conflict (https://cwe.mitre.org/data/definitions/436.html)
+
+
+
+Reported by Dastardly: https://portswigger.net/burp/dastardly/scan-checks
+]]></failure>
+        </testcase>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/public/css/screen.css" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/robots.txt" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/update/66aa3cfdce8943a4e1197d64" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/update/66aa3d00ce8943a4e1197d67" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/update/66aa3d33ce8943a4e1197d8e" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+    <testsuite failures="0" name="http://localhost:3001/update/66aa3d35ce8943a4e1197d8f" tests="1">
+        <testcase name="No issues were identified"/>
+    </testsuite>
+</testsuites>
