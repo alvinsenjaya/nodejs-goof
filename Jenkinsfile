@@ -199,4 +199,13 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            node('built-in') {
+                sh 'curl -X POST http://192.168.0.106:8080/api/v2/import-scan/ -H "Authorization: Token a49ba6566e3073f7d78b7d3f7c2136b750d8fb25" -F "scan_type=Trufflehog Scan" -F "file=@./trufflehog-scan-result.json;type=application/json" -F "engagement=3"'
+                sh 'curl -X POST http://192.168.0.106:8080/api/v2/import-scan/ -H "Authorization: Token a49ba6566e3073f7d78b7d3f7c2136b750d8fb25" -F "scan_type=Snyk Code Scan" -F "file=@./snyk-sast-report.json;type=application/json" -F "engagement=3"'
+                sh 'curl -X POST http://192.168.0.106:8080/api/v2/import-scan/ -H "Authorization: Token a49ba6566e3073f7d78b7d3f7c2136b750d8fb25" -F "scan_type=ZAP Scan" -F "file=@./zapbaseline.xml;type=text/xml" -F "engagement=3"'
+            }
+        }
+    }
 }
