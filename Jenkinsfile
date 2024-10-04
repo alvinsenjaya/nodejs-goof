@@ -99,7 +99,7 @@ pipeline {
             }
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh 'sonar-scanner -Dsonar.projectKey=nodejs-goof -Dsonar.qualitygate.wait=true -Dsonar.sources=. -Dsonar.host.url=http://192.168.0.116:9000 -Dsonar.token=$SONARQUBE_CREDENTIALS_PSW' 
+                    sh 'sonar-scanner -Dsonar.projectKey=nodejs-goof -Dsonar.qualitygate.wait=true -Dsonar.sources=. -Dsonar.host.url=http://192.168.0.105:9000 -Dsonar.token=$SONARQUBE_CREDENTIALS_PSW' 
                 }
             }
         }
