@@ -188,15 +188,21 @@ exports.create = function (req, res, next) {
 };
 
 exports.destroy = function (req, res, next) {
-  Todo.findById(req.params.id, function (err, todo) {
+  // Check if req.params.id is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).send('Invalid ID');
+  }
 
-    try {
-      todo.remove(function (err, todo) {
-        if (err) return next(err);
-        res.redirect('/');
-      });
-    } catch (e) {
+  Todo.findById(req.params.id, function (err, todo) {
+    if (err) return next(err);
+    if (!todo) {
+      return res.status(404).send('Todo not found');
     }
+
+    todo.remove(function (err) {
+      if (err) return next(err);
+      res.redirect('/');
+    });
   });
 };
 
