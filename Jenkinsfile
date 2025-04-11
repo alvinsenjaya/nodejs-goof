@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('DockerLogin')
         DEPLOY_USERNAME = 'ubuntu'
-        DEPLOYMENT_IP = '192.168.1.11'
+        DEPLOYMENT_IP = '192.168.0.11'
     }
     stages {
         stage('Build') {
