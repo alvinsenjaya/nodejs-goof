@@ -9,35 +9,52 @@ on:
       - main
 
 jobs:
-  security_scan_and_docker:
-    name: Security Scan & Docker Build
+  checkout:
+    name: Checkout Code
     runs-on: ubuntu-latest
-    env:
-      DEPLOY_USERNAME: ubuntu
-      DEPLOYMENT_IP: 192.168.1.11
-
+    outputs:
+      sha: ${{ steps.get_sha.outputs.sha }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run TruffleHog Scan
+      - name: Save commit SHA
+        id: get_sha
+        run: echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  trufflehog_scan:
+    name: Run TruffleHog Scan
+    runs-on: ubuntu-latest
+    needs: checkout
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run TruffleHog
         run: |
           docker run --rm -v ${{ github.workspace }}:/src trufflesecurity/trufflehog:latest \
             filesystem /src --exclude-paths /src/trufflehog-excluded-paths.txt --fail --json \
             | tee trufflehog-scan-result.json
 
-          # Count the number of findings
           if [ "$(jq 'length' trufflehog-scan-result.json)" -gt 0 ]; then
             echo "❌ TruffleHog found secrets!"
             exit 1
           fi
         continue-on-error: true
-        
+
       - name: Archive TruffleHog Result
         uses: actions/upload-artifact@v4
         with:
           name: trufflehog-results
           path: trufflehog-scan-result.json
+
+  setup_node:
+    name: Setup Node.js & Install Dependencies
+    runs-on: ubuntu-latest
+    needs: checkout
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -47,7 +64,17 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # Docker build and push
+  docker_build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [setup_node, trufflehog_scan]
+    env:
+      DEPLOY_USERNAME: ubuntu
+      DEPLOYMENT_IP: 192.168.1.11
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -59,5 +86,3 @@ jobs:
 
       - name: Push Docker Image
         run: docker push xenjutsu/nodejsgoof:latest
-
-    
