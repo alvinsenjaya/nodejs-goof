@@ -23,8 +23,16 @@ jobs:
       - name: Run TruffleHog Scan
         run: |
           docker run --rm -v ${{ github.workspace }}:/src trufflesecurity/trufflehog:latest \
-            filesystem /src --exclude-paths /src/trufflehog-excluded-paths.txt --fail --json | tee trufflehog-scan-result.json
+            filesystem /src --exclude-paths /src/trufflehog-excluded-paths.txt --fail --json \
+            | tee trufflehog-scan-result.json
 
+          # Count the number of findings
+          if [ "$(jq 'length' trufflehog-scan-result.json)" -gt 0 ]; then
+            echo "❌ TruffleHog found secrets!"
+            exit 1
+          fi
+        continue-on-error: true
+        
       - name: Archive TruffleHog Result
         uses: actions/upload-artifact@v4
         with:
