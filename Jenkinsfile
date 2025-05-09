@@ -2,6 +2,7 @@ pipeline {
     agent none
     environment {
         DOCKERHUB_CREDENTIALS = credentials('DockerLogin')
+        SNYK_CREDENTIALS = credentials('SnykToken')
         DEPLOY_USERNAME = 'ubuntu'
         DEPLOYMENT_IP = '192.168.0.11'
     }
@@ -29,6 +30,51 @@ pipeline {
             }
             steps {
                 sh 'npm install'
+            }
+        }
+        stage('SCA Snyk Test') {
+            agent {
+              docker {
+                  image 'snyk/snyk:node'
+                  args '-u root --network host --env SNYK_TOKEN=$SNYK_CREDENTIALS --entrypoint='
+              }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'snyk test --json > snyk-scan-report.json'
+                }
+                sh 'cat snyk-scan-report.json'
+                archiveArtifacts artifacts: 'snyk-scan-report.json'
+            }
+        }
+        stage('SCA Retire Js') {
+            agent {
+              docker {
+                  image 'node:lts-buster-slim'
+              }
+            }
+            steps {
+                sh 'npm install retire'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh './node_modules/retire/lib/cli.js --outputformat json --outputpath retire-scan-report.json'
+                }
+                sh 'cat retire-scan-report.json'
+                archiveArtifacts artifacts: 'retire-scan-report.json'
+            }
+        }
+        stage('SCA Trivy Scan Dockerfile Misconfiguration') {
+            agent {
+              docker {
+                  image 'aquasec/trivy:latest'
+                  args '-u root --network host --entrypoint='
+              }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'trivy config Dockerfile --exit-code=1 --format json > trivy-scan-dockerfile-report.json'
+                }
+                sh 'cat trivy-scan-dockerfile-report.json'
+                archiveArtifacts artifacts: 'trivy-scan-dockerfile-report.json'
             }
         }
         stage('Build Docker Image and Push to Docker Registry') {
