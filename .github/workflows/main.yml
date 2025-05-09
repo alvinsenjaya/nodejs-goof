@@ -118,6 +118,13 @@ jobs:
       - name: Show Retire.js Report
         run: cat retire-scan-report.json
 
+      - name: Fail if Retire.js Findings Found
+        run: |
+          if [ "$(jq '.data | length' retire-scan-report.json)" -gt 0 ]; then
+            echo "❌ Retire.js found vulnerable dependencies!"
+            exit 1
+          fi
+
       - name: Upload Retire.js Report
         uses: actions/upload-artifact@v4
         with:
@@ -140,6 +147,13 @@ jobs:
 
       - name: Show Trivy Dockerfile Report
         run: cat trivy-scan-dockerfile-report.json
+
+      - name: Fail if Trivy Findings Found
+        run: |
+          if [ "$(jq '[.Results[].MisconfSummary.Failures] | add' trivy-scan-dockerfile-report.json)" -gt 0 ]; then
+            echo "❌ Trivy found Dockerfile misconfigurations!"
+            exit 1
+          fi
 
       - name: Upload Trivy Report
         uses: actions/upload-artifact@v4
