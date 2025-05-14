@@ -57,11 +57,8 @@ function adminLoginSuccess(redirectPage, session, username, res) {
   // Log the login action for audit
   console.log(`User logged in: ${username}`)
 
-  if (redirectPage) {
-      return res.redirect(redirectPage)
-  } else {
-      return res.redirect('/admin')
-  }
+
+  return res.redirect('/admin')
 }
 
 exports.login = function (req, res, next) {
