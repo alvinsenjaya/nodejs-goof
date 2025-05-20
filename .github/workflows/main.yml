@@ -162,7 +162,37 @@ jobs:
         with:
           name: trivy-dockerfile-report
           path: trivy-scan-dockerfile-report.json
-
+  
+  snyk_sast_scan:
+    name: Snyk SAST Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+  
+      - name: Run Snyk SAST Scan via Docker
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          docker run --rm \
+            -u root \
+            --network host \
+            --env SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} \
+            --entrypoint='' \
+            -v ${{ github.workspace }}:/project \
+            -w /project \
+            snyk/snyk:node snyk code test --json > snyk-sast-report.json
+        continue-on-error: true
+  
+      - name: Show Snyk SAST Report
+        run: cat snyk-sast-report.json
+  
+      - name: Upload Snyk SAST Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-sast-report
+          path: snyk-sast-report.json
+  
 
   docker_build:
     name: Build & Push Docker Image
