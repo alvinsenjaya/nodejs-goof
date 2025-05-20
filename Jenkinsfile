@@ -3,8 +3,10 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('DockerLogin')
         SNYK_CREDENTIALS = credentials('SnykToken')
+        SONARQUBE_TOKEN = credentials('SonarToken')
         DEPLOY_USERNAME = 'ubuntu'
         DEPLOYMENT_IP = '192.168.0.11'
+        SONARQUBE_IP = '192.168.0.12' 
     }
     stages {
         stage('Secret Scanning Using Trufflehog') {
@@ -75,6 +77,34 @@ pipeline {
                 }
                 sh 'cat trivy-scan-dockerfile-report.json'
                 archiveArtifacts artifacts: 'trivy-scan-dockerfile-report.json'
+            }
+        }
+        stage('SAST Snyk') {
+            agent {
+              docker {
+                  image 'snyk/snyk:node'
+                  args '-u root --network host --env SNYK_TOKEN=$SNYK_CREDENTIALS --entrypoint='
+              }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'snyk code test --json > snyk-sast-report.json'
+                }
+                sh 'cat snyk-scan-report.json'
+                archiveArtifacts artifacts: 'snyk-sast-report.json'
+            }
+        }
+        stage('SAST SonarQube') {
+            agent {
+              docker {
+                  image 'sonarsource/sonar-scanner-cli:latest'
+                  args '--network host -v ".:/usr/src" --entrypoint='
+              }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'sonar-scanner -Dsonar.projectKey=nodejs-goof -Dsonar.qualitygate.wait=true -Dsonar.sources=. -Dsonar.host.url=http://$SONARQUBE_IP:9000 -Dsonar.token=$SONARQUBE_TOKEN' 
+                }
             }
         }
         stage('Build Docker Image and Push to Docker Registry') {
