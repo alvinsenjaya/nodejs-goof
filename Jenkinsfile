@@ -138,5 +138,51 @@ pipeline {
                 }
             }
         }
+        stage('DAST Wapiti') {
+            agent {
+                docker {
+                    image 'xenjutsu/wapiti:3.2.0'
+                    args '--user root --network host --entrypoint='
+                }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'wapiti -u http://$DEPLOYMENT_IP:3001 -f xml -o wapiti-report.xml'
+                }
+                archiveArtifacts artifacts: 'wapiti-report.xml'
+            }
+        }
+        stage('DAST Nuclei') {
+            agent {
+                docker {
+                    image 'projectdiscovery/nuclei'
+                    args '--user root --network host --entrypoint='
+                }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'nuclei -u http://$DEPLOYMENT_IP:3001 -nc -j > nuclei-report.json'
+                    sh 'cat nuclei-report.json'
+                }
+                archiveArtifacts artifacts: 'nuclei-report.json'
+            }
+        }
+        stage('DAST OWASP ZAP') {
+            agent {
+                docker {
+                    image 'ghcr.io/zaproxy/zaproxy:weekly'
+                    args '-u root --network host -v /var/run/docker.sock:/var/run/docker.sock --entrypoint= -v .:/zap/wrk/:rw'
+                }
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'zap-baseline.py -t http://$DEPLOYMENT_IP:3001 -r zapbaseline.html -x zapbaseline.xml'
+                }
+                sh 'cp /zap/wrk/zapbaseline.html ./zapbaseline.html'
+                sh 'cp /zap/wrk/zapbaseline.xml ./zapbaseline.xml'
+                archiveArtifacts artifacts: 'zapbaseline.html'
+                archiveArtifacts artifacts: 'zapbaseline.xml'
+            }
+        }
     }
 }
