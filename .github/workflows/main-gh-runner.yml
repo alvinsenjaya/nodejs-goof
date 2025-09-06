@@ -69,7 +69,7 @@ jobs:
             "context": "trufflehog-scan",
             "description": "$description"
           }
-          EOF
+EOF
 
   setup_node:
     name: Setup Node.js & Install Dependencies
@@ -140,7 +140,7 @@ jobs:
             "context": "retirejs-scan",
             "description": "$description"
           }
-          EOF
+EOF
 
   trivy_dockerfile_scan:
     name: Trivy Dockerfile Scan
@@ -190,7 +190,7 @@ jobs:
             "context": "trivy-dockerfile-scan",
             "description": "$description"
           }
-          EOF
+EOF
 
   docker_build:
     name: Build & Push Docker Image
