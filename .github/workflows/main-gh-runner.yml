@@ -59,17 +59,13 @@ jobs:
             description="TruffleHog scan passed"
           fi
 
+          json=$(printf '{"state":"%s","context":"trufflehog-scan","description":"%s"}' "$state" "$description")
+
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.STATUS_CHECK_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
-            -d @- << EOF
-          {
-            "state": "$state",
-            "context": "trufflehog-scan",
-            "description": "$description"
-          }
-EOF
+            -d "$json"
 
   setup_node:
     name: Setup Node.js & Install Dependencies
@@ -130,17 +126,13 @@ EOF
             description="Retire.js scan passed"
           fi
 
+          json=$(printf '{"state":"%s","context":"retirejs-scan","description":"%s"}' "$state" "$description")
+
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.STATUS_CHECK_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
-            -d @- << EOF
-          {
-            "state": "$state",
-            "context": "retirejs-scan",
-            "description": "$description"
-          }
-EOF
+            -d "$json"
 
   trivy_dockerfile_scan:
     name: Trivy Dockerfile Scan
@@ -180,17 +172,13 @@ EOF
             description="Trivy Dockerfile scan passed"
           fi
 
+          json=$(printf '{"state":"%s","context":"trivy-dockerfile-scan","description":"%s"}' "$state" "$description")
+
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.STATUS_CHECK_GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }} \
-            -d @- << EOF
-          {
-            "state": "$state",
-            "context": "trivy-dockerfile-scan",
-            "description": "$description"
-          }
-EOF
+            -d "$json"
 
   docker_build:
     name: Build & Push Docker Image
