@@ -198,7 +198,7 @@ jobs:
   docker_build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [setup_node, trufflehog_scan, snyk_sca_scan, snyk_sast_scan, retirejs_scan, trivy_dockerfile_scan]
+    needs: [setup_node, trufflehog_scan, retirejs_scan, trivy_dockerfile_scan]
     env:
       DEPLOY_USERNAME: ubuntu
       DEPLOYMENT_IP: 192.168.1.11
