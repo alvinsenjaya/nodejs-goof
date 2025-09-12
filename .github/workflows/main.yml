@@ -33,6 +33,17 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+  trufflehog_scan:
+    name: TruffleHog Secret Scan
+    runs-on: self-hosted
+    needs: checkout
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run TruffleHog Scan
+        run: trufflehog filesystem . --exclude-paths trufflehog-excluded-paths.txt
+
   docker_build:
     name: Build & Push Docker Image
     runs-on: self-hosted
