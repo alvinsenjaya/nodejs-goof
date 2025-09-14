@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run TruffleHog Scan
-        run: trufflehog filesystem . --exclude-paths trufflehog-excluded-paths.txt
+        run: trufflehog filesystem . --exclude-paths trufflehog-excluded-paths.txt --no-update
 
   docker_build:
     name: Build & Push Docker Image
