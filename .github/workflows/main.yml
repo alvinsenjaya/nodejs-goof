@@ -172,7 +172,8 @@ jobs:
           DOCKERHUB_CREDENTIALS_PSW: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USERNAME@$DEPLOYMENT_IP \
-            'docker pull xenjutsu/nodejsgoof:latest && \
+            'echo "$DOCKERHUB_CREDENTIALS_PSW" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin && \
+             docker pull xenjutsu/nodejsgoof:latest && \
              docker rm --force mongodb && \
              docker run --detach --name mongodb -p 27017:27017 mongo:3 && \
              docker rm --force nodejsgoof && \
