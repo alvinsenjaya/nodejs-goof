@@ -105,7 +105,7 @@ jobs:
   snyk_scan:
     name: Snyk SCA Scan
     runs-on: self-hosted
-    needs: setup_node
+    needs: checkout
     continue-on-error: true
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
