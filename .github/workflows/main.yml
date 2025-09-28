@@ -102,6 +102,31 @@ jobs:
           name: trivy-dockerfile-report
           path: trivy-scan-dockerfile-report.json
 
+  snyk_scan:
+    name: Snyk SCA Scan
+    runs-on: self-hosted
+    needs: setup_node
+    continue-on-error: true
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Snyk SCA Scan
+        run: |
+          snyk test --json > snyk-scan-report.json
+          cat snyk-scan-report.json
+
+      - name: Upload Snyk Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-scan-report
+          path: snyk-scan-report.json
 
   docker_build:
     name: Build & Push Docker Image
