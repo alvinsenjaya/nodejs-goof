@@ -42,7 +42,37 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run TruffleHog Scan
-        run: trufflehog filesystem . --exclude-paths trufflehog-excluded-paths.txt --no-update
+        run: |
+          trufflehog filesystem . \
+            --exclude-paths trufflehog-excluded-paths.txt \
+            --no-update \
+            --json > trufflehog-report.json || true
+          cat trufflehog-report.json
+
+      - name: Upload TruffleHog Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-report
+          path: trufflehog-report.json
+
+  retirejs_scan:
+    name: Retire.js SCA Scan
+    runs-on: self-hosted
+    needs: setup_node
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Retire.js Scan
+        run: |
+          retire --outputformat json --outputpath retire-scan-report.json || true
+          cat retire-scan-report.json
+
+      - name: Upload Retire.js Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: retirejs-report
+          path: retire-scan-report.json
 
   docker_build:
     name: Build & Push Docker Image
