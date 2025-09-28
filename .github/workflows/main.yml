@@ -60,15 +60,18 @@ jobs:
   retirejs_scan:
     name: Retire.js SCA Scan
     runs-on: self-hosted
-    needs: setup_node
+    needs: checkout
     continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install Dependencies
+        run: npm install
+
       - name: Run Retire.js Scan
         run: |
-          retire --outputformat json --outputpath retire-scan-report.json
+          npx retire --outputformat json --outputpath retire-scan-report.json
           cat retire-scan-report.json
 
       - name: Upload Retire.js Report
@@ -77,6 +80,28 @@ jobs:
         with:
           name: retirejs-report
           path: retire-scan-report.json
+
+  trivy_dockerfile_scan:
+    name: Trivy Dockerfile Misconfiguration Scan
+    runs-on: self-hosted
+    needs: checkout
+    continue-on-error: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Dockerfile Misconfig Scan
+        run: |
+          trivy config Dockerfile --exit-code=1 --format json > trivy-scan-dockerfile-report.json
+          cat trivy-scan-dockerfile-report.json
+
+      - name: Upload Trivy Dockerfile Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-dockerfile-report
+          path: trivy-scan-dockerfile-report.json
+
 
   docker_build:
     name: Build & Push Docker Image
