@@ -37,6 +37,7 @@ jobs:
     name: TruffleHog Secret Scan
     runs-on: self-hosted
     needs: checkout
+    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -45,11 +46,12 @@ jobs:
         run: |
           trufflehog filesystem . \
             --exclude-paths trufflehog-excluded-paths.txt \
-            --no-update \
-            --json > trufflehog-report.json || true
+            --no-update --fail \
+            --json > trufflehog-report.json
           cat trufflehog-report.json
 
       - name: Upload TruffleHog Report
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: trufflehog-report
@@ -59,16 +61,18 @@ jobs:
     name: Retire.js SCA Scan
     runs-on: self-hosted
     needs: setup_node
+    continue-on-error: true
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Run Retire.js Scan
         run: |
-          retire --outputformat json --outputpath retire-scan-report.json || true
+          retire --outputformat json --outputpath retire-scan-report.json
           cat retire-scan-report.json
 
       - name: Upload Retire.js Report
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: retirejs-report
