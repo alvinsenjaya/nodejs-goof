@@ -128,6 +128,60 @@ jobs:
           name: snyk-scan-report
           path: snyk-scan-report.json
 
+  sast_snyk:
+    name: Snyk SAST Scan
+    runs-on: self-hosted
+    needs: checkout
+    continue-on-error: true
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Snyk SAST (Code) Scan
+        run: |
+          snyk code test --json > snyk-sast-report.json
+          cat snyk-sast-report.json
+
+      - name: Upload Snyk SAST Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-sast-report
+          path: snyk-sast-report.json
+
+  sonarqube_scan:
+    name: SonarQube Scan
+    runs-on: self-hosted
+    needs: checkout
+    continue-on-error: true
+    env:
+      SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run SonarQube Scanner
+        run: |
+          # Run sonar-scanner and capture output to a log file
+          sonar-scanner -Dsonar.projectKey=nodejsgoof \
+            -Dsonar.qualitygate.wait=true \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://192.168.0.13:9000 \
+            -Dsonar.token=$SONARQUBE_TOKEN | tee sonar-scan.log
+          cat sonar-scan.log
+
+      - name: Upload SonarQube Scan Log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-scan-log
+          path: sonar-scan.log
+
   docker_build:
     name: Build & Push Docker Image
     runs-on: self-hosted
