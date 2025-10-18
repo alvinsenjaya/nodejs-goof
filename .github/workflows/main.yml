@@ -226,7 +226,44 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USERNAME@$DEPLOYMENT_IP \
             "echo '${DOCKERHUB_CREDENTIALS_PSW}' | docker login -u '${DOCKERHUB_CREDENTIALS_USR}' --password-stdin && \
              docker pull xenjutsu/nodejsgoof:latest && \
-             docker rm --force mongodb && \
-             docker run --detach --name mongodb -p 27017:27017 mongo:3 && \
-             docker rm --force nodejsgoof && \
-             docker run -it --detach --name nodejsgoof --network host xenjutsu/nodejsgoof:latest"
+             docker rm --force mongodb || true && \
+             docker run --detach --name mongodb --restart=always -p 27017:27017 mongo:3 && \
+             docker rm --force nodejsgoof || true && \
+             docker run -it --detach --name nodejsgoof --restart=always --network host xenjutsu/nodejsgoof:latest"
+
+  dast_wapiti:
+    name: DAST Scan with Wapiti
+    runs-on: self-hosted
+    needs: deploy
+    continue-on-error: true
+    steps:
+      - name: Run Wapiti Scan
+        run: |
+          wapiti -u http://192.168.0.12:3001/ -o reportwapiti
+          zip -r reportwapiti.zip reportwapiti
+
+      - name: Upload Wapiti Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: wapiti-report
+          path: reportwapiti.zip
+
+  dast_zap:
+    name: DAST Scan with OWASP ZAP
+    runs-on: self-hosted
+    needs: deploy
+    continue-on-error: true
+    steps:
+      - name: Run OWASP ZAP Full Scan
+        run: |
+          docker run -v $(pwd):/zap/wrk/:rw --network host --rm -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py -t http://192.168.0.12:3001 -g gen.conf -r reportzapfull.html -x reportzapfull.xml
+          zip zap-report.zip reportzapfull.html reportzapfull.xml
+
+      - name: Upload ZAP Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-dast-report
+          path: zap-report.zip
